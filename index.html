@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema CAS - Portal de Pedidos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 500px;
+            background: #ffffff;
+            padding: 30px;
+            margin: 40px auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #e91e63;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #d81b60;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Sistema CAS - Solicitud</h2>
+        
+        <!-- Formulario conectado a tu Formspree -->
+        <form action="https://formspree.io/f/xnpddnog" method="POST">
+            
+            <div class="form-group">
+                <label for="nombre_cliente">Nombre completo:</label>
+                <input type="text" id="nombre_cliente" name="nombre_cliente" required placeholder="Ingresa tu nombre">
+            </div>
+
+            <div class="form-group">
+                <label for="telefono">Número de Celular / WhatsApp:</label>
+                <input type="tel" id="telefono" name="telefono" required placeholder="999888777">
+            </div>
+
+            <div class="form-group">
+                <label for="tipo_prestamo">Tipo de Solicitud:</label>
+                <select id="tipo_prestamo" name="tipo_prestamo">
+                    <option value="Prestamo Personal">Préstamo Personal</option>
+                    <option value="Prestamo con Garantia">Préstamo con Garantía</option>
+                    <option value="Refinanciamiento">Refinanciamiento</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="monto">Monto Solicitado (S/.):</label>
+                <input type="number" id="monto" name="monto" required placeholder="1000">
+            </div>
+
+            <button type="submit">Enviar Solicitud</button>
+        </form>
+    </div>
+
+</body>
+</html>
