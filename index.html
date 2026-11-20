@@ -21,7 +21,7 @@
         }
         h2 {
             text-align: center;
-            color: #333;
+            color: #1e3a8a;
             margin-bottom: 20px;
         }
         .form-group {
@@ -30,68 +30,113 @@
         label {
             display: block;
             margin-bottom: 5px;
-            color: #555;
+            color: #333;
             font-weight: bold;
+            font-size: 14px;
         }
         input, select {
             width: 100%;
             padding: 10px;
-            border: 1px solid #ccc;
+            border: 1px solid #cbd5e1;
             border-radius: 4px;
+            font-size: 14px;
             box-sizing: border-box;
         }
-        button {
-            width: 100%;
+        .previa-calculo {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
             padding: 12px;
-            background-color: #e91e63;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            color: #1e293b;
+        }
+        .previa-calculo p {
+            margin: 5px 0;
+        }
+        .btn-enviar {
+            width: 100%;
+            background-color: #1e3a8a;
             color: white;
+            padding: 12px;
             border: none;
             border-radius: 4px;
-            font-size: 16px;
-            cursor: pointer;
+            font-size: 15px;
             font-weight: bold;
-            margin-top: 10px;
+            cursor: pointer;
         }
-        button:hover {
-            background-color: #d81b60;
+        .btn-enviar:hover {
+            background-color: #172554;
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h2>Sistema CAS - Solicitud</h2>
-        
-        <!-- Formulario conectado a tu Formspree -->
-        <form action="https://formspree.io/f/xnpddnog" method="POST">
-            
+        <h2>Sistema CAS - Portal de Pedidos</h2>
+
+        <form id="formSolicitudCAS" action="recepcion.html" method="GET">
             <div class="form-group">
-                <label for="nombre_cliente">Nombre completo:</label>
-                <input type="text" id="nombre_cliente" name="nombre_cliente" required placeholder="Ingresa tu nombre">
+                <label for="nombre">Nombre Completo</label>
+                <input type="text" id="nombre" name="nombre" required placeholder="Ej. Carlos Quispe">
             </div>
 
             <div class="form-group">
-                <label for="telefono">Número de Celular / WhatsApp:</label>
-                <input type="tel" id="telefono" name="telefono" required placeholder="999888777">
-            </div>
-
-            <div class="form-group">
-                <label for="tipo_prestamo">Tipo de Solicitud:</label>
-                <select id="tipo_prestamo" name="tipo_prestamo">
-                    <option value="Prestamo Personal">Préstamo Personal</option>
-                    <option value="Prestamo con Garantia">Préstamo con Garantía</option>
-                    <option value="Refinanciamiento">Refinanciamiento</option>
+                <label for="tipoDoc">Tipo de Documento</label>
+                <select id="tipoDoc" name="tipoDoc" required>
+                    <option value="DNI">DNI</option>
+                    <option value="CE">Carné de Extranjería</option>
+                    <option value="RUC">RUC</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label for="monto">Monto Solicitado (S/.):</label>
-                <input type="number" id="monto" name="monto" required placeholder="1000">
+                <label for="numeroDoc">Número de Documento</label>
+                <input type="text" id="numeroDoc" name="numeroDoc" required placeholder="Ej. 45678912">
             </div>
 
-            <button type="submit">Enviar Solicitud</button>
+            <div class="form-group">
+                <label for="monto">Monto a Solicitar (S/)</label>
+                <input type="number" id="monto" name="monto" step="0.01" min="1" required placeholder="Ej. 50">
+            </div>
+
+            <div class="form-group">
+                <label for="telefono">Teléfono / WhatsApp</label>
+                <input type="tel" id="telefono" name="telefono" required placeholder="Ej. 987654321">
+            </div>
+
+            <div class="previa-calculo" id="previaCalculo">
+                <p><strong>Interés (9%):</strong> S/ 0.00</p>
+                <p><strong>Total Estimado a Pagar:</strong> S/ 0.00</p>
+            </div>
+
+            <button type="submit" class="btn-enviar">Enviar Solicitud</button>
         </form>
     </div>
 
+    <script>
+        const TASA = 0.09;
+        const inputMonto = document.getElementById('monto');
+        const previa = document.getElementById('previaCalculo');
+
+        function actualizarPrevia() {
+            const val = parseFloat(inputMonto.value);
+            if (!isNaN(val) && val > 0) {
+                const interes = val * TASA;
+                const total = val + interes;
+                previa.innerHTML = `
+                    <p><strong>Interés (9%):</strong> S/ ${interes.toFixed(2)}</p>
+                    <p><strong>Total Estimado a Pagar:</strong> S/ ${total.toFixed(2)}</p>
+                `;
+            } else {
+                previa.innerHTML = `
+                    <p><strong>Interés (9%):</strong> S/ 0.00</p>
+                    <p><strong>Total Estimado a Pagar:</strong> S/ 0.00</p>
+                `;
+            }
+        }
+
+        inputMonto.addEventListener('input', actualizarPrevia);
+    </script>
 </body>
 </html>
