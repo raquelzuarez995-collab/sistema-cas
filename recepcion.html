@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Recepción CAS</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            background: #ffffff;
+            padding: 25px;
+            margin: 30px auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        h2 {
+            margin: 0;
+            color: #1e3a8a;
+        }
+        .btn-volver {
+            text-decoration: none;
+            background-color: #1e3a8a;
+            color: #ffffff;
+            padding: 9px 14px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .btn-volver:hover {
+            background-color: #172554;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        th, td {
+            border: 1px solid #cbd5e1;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #e2e8f0;
+            color: #0f172a;
+        }
+        .estado-pendiente {
+            color: #b45309;
+            font-weight: bold;
+        }
+        .estado-pagado {
+            color: #15803d;
+            font-weight: bold;
+        }
+        .btn-estado {
+            padding: 6px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            background-color: #0f766e;
+            color: #ffffff;
+        }
+        .vacio {
+            color: #475569;
+            padding: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-row">
+            <h2>Panel de Recepción CAS</h2>
+            <a href="index.html" class="btn-volver">Volver al Portal de Pedidos</a>
+        </div>
+        <div id="contenidoPanel"></div>
+    </div>
+
+    <script>
+        const TASA = 0.09;
+        const STORAGE_KEY = 'solicitudes_cas_v1';
+
+        function leerSolicitudes() {
+            try {
+                return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function guardarSolicitudes(lista) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(lista));
+        }
+
+        function obtenerSolicitudDesdeURL() {
+            const params = new URLSearchParams(window.location.search);
+            const nombre = (params.get('nombre') || '').trim();
+            const tipoDoc = (params.get('tipoDoc') || '').trim();
+            const numeroDoc = (params.get('numeroDoc') || '').trim();
+            const montoRaw = parseFloat(params.get('monto'));
+            const telefono = (params.get('telefono') || '').trim();
+
+            if (!nombre || isNaN(montoRaw) || montoRaw <= 0) {
+                return null;
+            }
+
+            const interes = +(montoRaw * TASA).toFixed(2);
+            const total = +(montoRaw + interes).toFixed(2);
+
+            return {
+                id: Date.now().toString(),
+                nombre,
+                tipoDoc,
+                numeroDoc,
+                monto: +montoRaw.toFixed(2),
+                interes,
+                total,
+                telefono,
+                estado: 'Pendiente',
+                fechaPago: '-'
+            };
+        }
+
+        function alternarEstado(id) {
+            const lista = leerSolicitudes();
+            const actualizada = lista.map(item => {
+                if (item.id !== id) return item;
+                if (item.estado === 'Pendiente') {
+                    return {
+                        ...item,
+                        estado: 'Pagado',
+                        fechaPago: new Date().toLocaleDateString('es-PE')
+                    };
+                }
+                return {
+                    ...item,
+                    estado: 'Pendiente',
+                    fechaPago: '-'
+                };
+            });
+            guardarSolicitudes(actualizada);
+            renderizar();
+        }
+
+        function renderizar() {
+            const lista = leerSolicitudes();
+            const contenedor = document.getElementById('contenidoPanel');
+
+            if (lista.length === 0) {
+                contenedor.innerHTML = '<p class="vacio">Aún no hay solicitudes registradas. Envía una desde el Portal de Pedidos.</p>';
+                return;
+            }
+
+            const filas = lista.map(item => `
+                <tr>
+                    <td>${item.nombre}</td>
+                    <td>${item.tipoDoc} ${item.numeroDoc}</td>
+                    <td>S/ ${item.monto.toFixed(2)}</td>
+                    <td>S/ ${item.interes.toFixed(2)}</td>
+                    <td><strong>S/ ${item.total.toFixed(2)}</strong></td>
+                    <td>${item.telefono}</td>
+                    <td class="${item.estado === 'Pagado' ? 'estado-pagado' : 'estado-pendiente'}">${item.estado}</td>
+                    <td>${item.fechaPago}</td>
+                    <td>
+                        <button class="btn-estado" onclick="alternarEstado('${item.id}')">
+                            ${item.estado === 'Pendiente' ? 'Marcar Pagado' : 'Marcar Pendiente'}
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+
+            contenedor.innerHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Documento</th>
+                            <th>Monto</th>
+                            <th>Interés (9%)</th>
+                            <th>Total</th>
+                            <th>Teléfono</th>
+                            <th>Estado</th>
+                            <th>Fecha Pago</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>${filas}</tbody>
+                </table>
+            `;
+        }
+
+        (function iniciar() {
+            const nueva = obtenerSolicitudDesdeURL();
+            if (nueva) {
+                const lista = leerSolicitudes();
+                lista.unshift(nueva);
+                guardarSolicitudes(lista);
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+            renderizar();
+        })();
+    </script>
+</body>
+</html>
